@@ -18,8 +18,6 @@
 #include "rpmte-py.h"
 #include "rpmts-py.h"
 
-#include "debug.h"
-
 /** \ingroup python
  * \name Module: rpm
  */
