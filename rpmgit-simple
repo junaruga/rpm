@@ -1,0 +1,6 @@
+#!/bin/sh
+
+./autogen.sh --noconfigure
+./configure \
+    --prefix=/usr/local/rpm-dev
+make -j8

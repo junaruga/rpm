@@ -1,0 +1,26 @@
+#!/bin/sh
+
+#export CPPFLAGS="-I/`rpm --eval %{_includedir}`/libdb `pkg-config --cflags nss`"
+
+export LDFLAGS="-L/`rpm --eval %{_libdir}`/libdb"
+export CFLAGS=`rpm --eval "%{optflags}"`
+
+./autogen.sh --noconfigure && \
+./configure \
+	--with-hackingdocs \
+	--build=`rpm --eval %{_build}` \
+	--prefix=/usr/local/rpm-dev \
+	--libdir=`rpm --eval %{_libdir}` \
+	--sysconfdir=/etc \
+	--localstatedir=/var \
+	--enable-python \
+	--with-external-db \
+	--without-apidocs \
+	--with-cap \
+	--with-lua \
+	--with-archive \
+	--with-magic \
+	--with-archive \
+	--without-selinux $* && \
+#	--enable-ndb \
+make -j8
