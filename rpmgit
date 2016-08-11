@@ -9,7 +9,7 @@ export CFLAGS=`rpm --eval "%{optflags}"`
 ./configure \
 	--with-hackingdocs \
 	--build=`rpm --eval %{_build}` \
-	--prefix=/usr/local/rpm-dev \
+	--prefix=/usr \
 	--libdir=`rpm --eval %{_libdir}` \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
