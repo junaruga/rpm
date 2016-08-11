@@ -2,15 +2,15 @@
 
 #export CPPFLAGS="-I/`rpm --eval %{_includedir}`/libdb `pkg-config --cflags nss`"
 
-export LDFLAGS="-L/`rpm --eval %{_libdir}`/libdb"
-export CFLAGS=`rpm --eval "%{optflags}"`
+export LDFLAGS="-L/usr/lib64/libdb"
+export CFLAGS="-O2 -g"
 
 ./autogen.sh --noconfigure && \
 ./configure \
 	--with-hackingdocs \
-	--build=`rpm --eval %{_build}` \
+	--build=x86_64-unknown-linux-gnu \
 	--prefix=/usr \
-	--libdir=`rpm --eval %{_libdir}` \
+	--libdir=/usr/lib64 \
 	--sysconfdir=/etc \
 	--localstatedir=/var \
 	--enable-python \
