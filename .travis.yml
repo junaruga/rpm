@@ -4,10 +4,9 @@ services:
   - docker
 env:
     # Ref: https://hub.docker.com/r/_/fedora/
-    # - DOCKER_IMAGE=fedora:24
-    # - DOCKER_IMAGE=fedora:latest
-    - DOCKER_IMAGE=fedora:rawhide
-# Skip install section.
+    # - CONTAINER_IMAGE=fedora:24
+    # - CONTAINER_IMAGE=fedora:latest
+    - CONTAINER_IMAGE=fedora:rawhide
 install: true
 script:
-  - scripts/travis.sh
+  - scripts/run-in-container.sh scripts/build.sh check-all

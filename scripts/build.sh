@@ -10,14 +10,13 @@ set -ex
 # WITH_LIBARCHIVE='0'
 # WITH_LIBIMAEVM='0'
 # WITH_NDB='1'
-
-_USR='/usr'
-_SYSCONFDIR='/etc'
-_VAR='/var'
-_LIBDIR="$(rpm --eval '%{_libdir}')"
-_TARGET_PLATFORM="$(rpm --eval '%{_build}')"
-PREFIX="${_USR}"
-# PREFIX="$(pwd)/dist"
+DEFAULT_PREFIX='/usr'
+DEFAULT_SYSCONFDIR='/etc'
+DEFAULT_LOCALSTATEDIR='/var'
+DEFAULT_SHAREDSTATEDIR='/var/lib'
+DEFAULT_LIBDIR="$(rpm --eval '%{_libdir}')"
+DEFAULT_TARGET_PLATFORM="$(rpm --eval '%{_build}')"
+ROOT_DIR="$(dirname "${0}")/.."
 
 print_usage() {
     echo "Usage: $0 {install_dependency|build|check}" 1>&2
@@ -25,7 +24,7 @@ print_usage() {
 
 install_dependency() {
     echo 'Installing dependency packages ...'
-    PACKAGES="
+    local packages=(
         libdb-devel
         coreutils
         popt
@@ -59,41 +58,48 @@ install_dependency() {
         python-devel
         python3-devel
         which
-        autoconf
-        rpm-build
-    "
-    for PACKAGE in ${PACKAGES}; do
-        dnf -y install "${PACKAGE}"
+    )
+    for package in ${packages[*]}; do
+        dnf -y install "${package}"
     done
 }
 
 build() {
     echo 'Building ...'
 
+    # To customize from outside.
+    PREFIX="${PREFIX:-${DEFAULT_PREFIX}}"
+    SYSCONFDIR="${SYSCONFDIR:-${DEFAULT_SYSCONFDIR}}"
+    LOCALSTATEDIR="${LOCALSTATEDIR:-${DEFAULT_LOCALSTATEDIR}}"
+    SHAREDSTATEDIR="${SHAREDSTATEDIR:-${DEFAULT_SHAREDSTATEDIR}}"
+    LIBDIR="${LIBDIR:-${DEFAULT_LIBDIR}}"
+    TARGET_PLATFORM="${TARGET_PLATFORM:-${DEFAULT_TARGET_PLATFORM}}"
+    CONFIGURE_ARGS="
+        --prefix=${PREFIX}
+        --sysconfdir=${SYSCONFDIR}
+        --localstatedir=${LOCALSTATEDIR}
+        --sharedstatedir=${SHAREDSTATEDIR}
+        --libdir=${LIBDIR}
+        --build=${TARGET_PLATFORM}
+        --host=${TARGET_PLATFORM}
+        --with-vendor=redhat
+        --with-external-db
+        --with-lua
+        --with-selinux
+        --with-cap
+        --with-acl
+        --with-ndb
+        --enable-python
+        --with-crypto=openssl
+    "
+
     CPPFLAGS="${CPPFLAGS} -DLUA_COMPAT_APIINTCASTS"
     CFLAGS="${CFLAGS} -DLUA_COMPAT_APIINTCASTS"
-    LDFLAGS="${LDFLAGS} -L/${_LIBDIR}/libdb"
+    LDFLAGS="${LDFLAGS} -L/${LIBDIR}/libdb"
     export CPPFLAGS CFLAGS LDFLAGS
 
     ./autogen.sh --noconfigure
-    # ./configure --prefix="${PREFIX}" --enable-python
-    ./configure \
-        --prefix="${PREFIX}" \
-        --sysconfdir="${_SYSCONFDIR}" \
-        --localstatedir="${_VAR}" \
-        --sharedstatedir="${_VAR}/lib" \
-        --libdir="${_LIBDIR}" \
-        --build="${_TARGET_PLATFORM}" \
-        --host="${_TARGET_PLATFORM}" \
-        --with-vendor=redhat \
-        --with-external-db \
-        --with-lua \
-        --with-selinux \
-        --with-cap \
-        --with-acl \
-        --with-ndb \
-        --enable-python \
-        --with-crypto=openssl
+    ./configure ${CONFIGURE_ARGS}
     make -j8
 }
 
@@ -108,23 +114,39 @@ check() {
 
 print_failed_tests_log() {
     echo 'Printing rpmtests.log ...'
-    find tests -name rpmtests.log | while read -r LOG_FILE; do
+    find tests -name rpmtests.log | while read -r log_file; do
         echo "## ========================== ##"
-        echo "${LOG_FILE}"
+        echo "${log_file}"
         echo "## ========================== ##"
-        cat "${LOG_FILE}"
+        cat "${log_file}"
         echo
     done
 }
 
-all() {
-    install_dependency && build && check
+check-all() {
+    # TODO Create array object of hash.
+    # declare -A test_cases
+    #
+    # test_cases=(
+    #     (
+    #         [name]='test_for_system_install'
+    #     )
+    #     (
+    #         [name]='test_for_user_install'
+    #         [env]=(
+    #             [CONFIGURE_ARGS]='--prefix ${ROOT_DIR}/dist'
+    #         )
+    #     )
+    # )
+
+    install_dependency
+    build
+    check
 }
 
-ROOT_DIR="$(dirname "${0}")/.."
 cd "${ROOT_DIR}"
 
-case "$1" in
+case "${1}" in
     install_dependency)
         install_dependency
         ;;
@@ -134,8 +156,8 @@ case "$1" in
     check)
         check
         ;;
-    all)
-        all
+    check-all)
+        check-all
         ;;
     *)
         print_usage
