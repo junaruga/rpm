@@ -1,4 +1,4 @@
-language: python
+# language: python
 sudo: required
 services:
   - docker
@@ -17,8 +17,8 @@ install:
     docker build \
         -t rpm \
         .
-before_script:
-  - sudo chown -R 1000 .
+# before_script:
+#   - sudo chown -R 1000 .
 script:
   - |
     DIR=$(pwd)
