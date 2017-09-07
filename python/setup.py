@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# from setuptools import setup, Extension
+# from setuptools.command.build_py import build_py
+# from setuptools.command.build_ext import build_ext
+# from setuptools.command.install_lib import install_lib
 from distutils.core import setup, Extension
 import os
 import subprocess
@@ -56,4 +60,10 @@ setup(name='rpm',
       maintainer_email='rpm-maint@lists.rpm.org',
       url='http://www.rpm.org/',
       packages=['rpm'],
-      ext_modules=[rpmmod, rpmbuild_mod, rpmsign_mod])
+      ext_modules=[rpmmod, rpmbuild_mod, rpmsign_mod],
+      # cmdclass={
+      #     'build_py': build_py,
+      #     'build_ext': build_ext,
+      #     'install_lib': install_lib
+      # },
+      )
