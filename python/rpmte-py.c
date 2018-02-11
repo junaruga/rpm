@@ -184,7 +184,7 @@ rpmte_DS(rpmteObject * s, PyObject * args, PyObject * kwds)
     if (ds == NULL) {
 	Py_RETURN_NONE;
     }
-    return rpmds_Wrap(&rpmds_Type, rpmdsLink(ds, RPMDBG_M("rpmte_DS")));
+    return rpmds_Wrap(&rpmds_Type, rpmdsLink(ds, "rpmte_DS"));
 }
 
 static PyObject *
@@ -196,7 +196,7 @@ rpmte_FI(rpmteObject * s, PyObject * args, PyObject * kwds)
     if (fi == NULL) {
 	Py_RETURN_NONE;
     }
-    return rpmfi_Wrap(&rpmfi_Type, rpmfiLink(fi, RPMDBG_M("rpmte_FI")));
+    return rpmfi_Wrap(&rpmfi_Type, rpmfiLink(fi, "rpmte_FI"));
 }
 
 static struct PyMethodDef rpmte_methods[] = {
